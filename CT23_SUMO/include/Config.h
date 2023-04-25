@@ -12,7 +12,7 @@ enum state
 // Movidas del mando PS4
 const char MAC_ADDRESS[] = "70:b8:f6:5d:6a:b8";
 const int DS4_MAX_ANALOG_VALUE = 255;
-const int DS4_TRIGGER_HP_VALUE = 100;
+const int DS4_TRIGGER_HP_VALUE = 130;
 
 // -------- Movidas de la lectura de tension ----
 const uint8_t PIN_VSENSOR = 38;
