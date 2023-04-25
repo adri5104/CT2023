@@ -3,8 +3,14 @@
 
 #define SERIAL_PRINT_
 
+enum state
+{
+    MODE_NORMAL,
+    MODE_TURBO
+};
+
 // Movidas del mando PS4
-const char MAC_ADDRESS[] = "08:3a:f2:af:02:34";
+const char MAC_ADDRESS[] = "70:b8:f6:5d:6a:b8";
 const int DS4_MAX_ANALOG_VALUE = 255;
 const int DS4_TRIGGER_HP_VALUE = 100;
 
@@ -16,8 +22,8 @@ const int V_MIN_ADC = 0;
 
 // --------------- Parametros motores ----------
 
-const uint8_t PWM_MAX_LP = 100;
-const uint8_t PWM_MAX_HP = 200;
+const uint8_t PWM_MAX_LP = 130;
+const uint8_t PWM_MAX_HP = 250;
 
 // --------------- PINES ----------------
 

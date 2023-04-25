@@ -17,6 +17,9 @@ int vel_L = 0;
 int left_stick[2] = {0, 0};
 int right_stick[2] = {0, 0};
 int gatillos[2] = {0, 0};
+bool button_pre = false;
+
+state Estado = MODE_NORMAL;
 
 void setup()
 {
@@ -35,6 +38,25 @@ void setup()
 
 void loop()
 {
+
+  // Lo nuevo
+  if(PS4.Square() && button_pre == false)
+  {
+    if(Estado == MODE_NORMAL)
+    {
+      Estado = MODE_TURBO;
+    }
+    else
+    {
+      Estado = MODE_NORMAL;
+    }
+    button_pre = true;
+  }
+  else
+  {
+    button_pre = false;
+  }
+  
   // Lectura de tension de la bateria
   int v_bat = analogRead(PIN_VSENSOR);
   v_bat = map(v_bat, V_MIN_ADC, V_MAX_ADC, 0, 100);
@@ -72,41 +94,84 @@ void loop()
 
   // --------------------- Control de los motores -------------------
 
-  // Direccion 
-  if(right_stick[Y] > 0)
+  if(Estado == MODE_NORMAL)
   {
-    Motor_R.setFwd();
+    // Direccion 
+    if(right_stick[Y] > 0)
+    {
+      Motor_R.setFwd();
+    }
+    else
+    {
+      Motor_R.setBack();  
+    }
+
+    if(left_stick[Y] > 0)
+    {
+      Motor_L.setFwd();
+    }
+    else
+    {
+      Motor_L.setBack();  
+    }
+
+    //PWM
+    if(abs(gatillos[R]) > DS4_TRIGGER_HP_VALUE &&(gatillos[L]) > DS4_TRIGGER_HP_VALUE)
+    {
+      vel_R = map(abs(right_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_HP);
+      vel_L = map(abs(left_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_HP);
+      Motor_R.setPWM(vel_R > PWM_MAX_HP? PWM_MAX_HP : vel_R);
+      Motor_L.setPWM(vel_L > PWM_MAX_HP? PWM_MAX_HP : vel_L);
+    }
+    // Modo BP
+    else
+    {
+      vel_R = map(abs(right_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_LP);
+      vel_L = map(abs(left_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_LP);
+      Motor_R.setPWM(vel_R > PWM_MAX_HP? PWM_MAX_LP : vel_R);
+      Motor_L.setPWM(vel_L > PWM_MAX_HP? PWM_MAX_LP : vel_L);
+    }
+    PS4.setLed(0,255,0);
   }
-  else
+  
+
+  if(Estado == MODE_TURBO)
   {
-    Motor_R.setBack();  
+    int vel_base = left_stick[Y];
+    int vel_giro = left_stick[X];
+
+    vel_R = vel_base - vel_giro;
+    vel_L = vel_base + vel_giro;
+
+    vel_R = map(vel_R, -(255+255), (2*255), gatillos[L] == 1? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] == 1? PWM_MAX_HP : PWM_MAX_LP);
+    vel_L = map(vel_L, -(255+255), (2*255), gatillos[L] == 1? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] == 1? PWM_MAX_HP : PWM_MAX_LP);
+
+    if(vel_R > 0)
+    {
+      Motor_R.setFwd();
+      Motor_R.setPWM(abs(vel_R));
+    }
+    else
+    {
+      Motor_R.setBack();
+      Motor_R.setPWM(abs(vel_R));
+    }
+
+    if(vel_L > 0)
+    {
+      Motor_L.setFwd();
+      Motor_L.setPWM(abs(vel_L));
+    }
+    else
+    {
+      Motor_L.setBack();
+      Motor_L.setPWM(abs(vel_L));
+    }
+    
+    PS4.setLed(0,0,255);
   }
 
-  if(left_stick[Y] > 0)
-  {
-    Motor_L.setFwd();
-  }
-  else
-  {
-    Motor_L.setBack();  
-  }
 
-  //PWM
-  if(abs(gatillos[R]) > DS4_TRIGGER_HP_VALUE &&(gatillos[L]) > DS4_TRIGGER_HP_VALUE)
-  {
-    vel_R = map(abs(right_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_HP);
-    vel_L = map(abs(left_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_HP);
-    Motor_R.setPWM(vel_R > PWM_MAX_HP? PWM_MAX_HP : vel_R);
-    Motor_L.setPWM(vel_L > PWM_MAX_HP? PWM_MAX_HP : vel_L);
-  }
-  // Modo BP
-  else
-  {
-    vel_R = map(abs(right_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_LP);
-    vel_L = map(abs(left_stick[Y]),0,DS4_MAX_ANALOG_VALUE, 0,PWM_MAX_LP);
-    Motor_R.setPWM(vel_R > PWM_MAX_HP? PWM_MAX_LP : vel_R);
-    Motor_L.setPWM(vel_L > PWM_MAX_HP? PWM_MAX_LP : vel_L);
-  }
 
   String str = "Vel_R: " + String(vel_R) + ", Vel_L: " + String(vel_L);
   Serial.println(str);
@@ -114,9 +179,9 @@ void loop()
 
   
 
-  PS4.setLed(gatillos[X], 0, gatillos[Y]);
+  
   PS4.setFlashRate(50, 50);
-  PS4.setRumble(PS4.L2Value(), PS4.R2Value());
+  //PS4.setRumble(PS4.L2Value(), PS4.R2Value());
   PS4.sendToController();
 
   
