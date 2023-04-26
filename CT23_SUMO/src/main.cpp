@@ -68,7 +68,7 @@ void loop()
     }
     button_pre = true;
   }
-  else if(!PS4.Square())
+  else if(!button)
   {
     button_pre = false;
   }
