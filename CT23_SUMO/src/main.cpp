@@ -17,6 +17,7 @@ int vel_L = 0;
 int left_stick[2] = {0, 0};
 int right_stick[2] = {0, 0};
 int gatillos[2] = {0, 0};
+bool button = false;
 bool button_pre = false;
 
 state Estado = MODE_NORMAL;
@@ -39,8 +40,23 @@ void setup()
 void loop()
 {
 
-  // Lo nuevo
-  if(PS4.Square() && button_pre == false)
+  // Leemos datos incoming del mando
+  if (PS4.isConnected())
+  {
+    left_stick[X] = PS4.LStickX();
+    left_stick[Y] = PS4.LStickY();
+
+    right_stick[X] = PS4.RStickX();
+    right_stick[Y] = PS4.RStickY();
+
+    gatillos[L] = PS4.L2Value();
+    gatillos[R] = PS4.R2Value();
+
+    button = PS4.Square();
+  }
+
+  // Cambio de modo
+  if(button && button_pre == false)
   {
     if(Estado == MODE_NORMAL)
     {
@@ -79,21 +95,12 @@ void loop()
   */
 
   
-  // Leemos movidas del mando
-  if (PS4.isConnected())
-  {
-    left_stick[X] = PS4.LStickX();
-    left_stick[Y] = PS4.LStickY();
-
-    right_stick[X] = PS4.RStickX();
-    right_stick[Y] = PS4.RStickY();
-
-    gatillos[L] = PS4.L2Value();
-    gatillos[R] = PS4.R2Value();
-  }
+  
 
   // --------------------- Control de los motores -------------------
 
+
+  // Modo normal
   if(Estado == MODE_NORMAL)
   {
     // Direccion 
@@ -135,6 +142,7 @@ void loop()
   }
   
 
+  // Modo turbo
   if(Estado == MODE_TURBO)
   {
     int vel_base = left_stick[Y];
@@ -173,13 +181,14 @@ void loop()
 
 
 
+  // Salida de datos por serial
   String str = "Vel_R: " + String(vel_R) + ", Vel_L: " + String(vel_L);
   Serial.println(str);
 
 
   
 
-  
+  // Enviamos datos outcoming al mando
   PS4.setFlashRate(50, 50);
   //PS4.setRumble(PS4.L2Value(), PS4.R2Value());
   PS4.sendToController();
