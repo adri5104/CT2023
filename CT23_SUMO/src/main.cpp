@@ -151,8 +151,8 @@ void loop()
     vel_R = vel_base - vel_giro;
     vel_L = vel_base + vel_giro;
 
-    vel_R = map(vel_R, -(255+255), (2*255), gatillos[L] > DS4_TRIGGER_HP_VALUE? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] > DS4_TRIGGER_HP_VALUE? PWM_MAX_HP : PWM_MAX_LP);
-    vel_L = map(vel_L, -(255+255), (2*255), gatillos[L] > DS4_TRIGGER_HP_VALUE? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] > DS4_TRIGGER_HP_VALUE? PWM_MAX_HP : PWM_MAX_LP);
+    vel_R = map(vel_R, -(2*(DS4_MAX_ANALOG_VALUE)), (2*DS4_MAX_ANALOG_VALUE), gatillos[L] > DS4_TRIGGER_HP_VALUE? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] > DS4_TRIGGER_HP_VALUE? PWM_MAX_HP : PWM_MAX_LP);
+    vel_L = map(vel_L, -(2*DS4_MAX_ANALOG_VALUE), (2*DS4_MAX_ANALOG_VALUE), gatillos[L] > DS4_TRIGGER_HP_VALUE? -PWM_MAX_HP : -PWM_MAX_LP,gatillos[L] > DS4_TRIGGER_HP_VALUE? PWM_MAX_HP : PWM_MAX_LP);
 
     if(vel_R > 0)
     {
